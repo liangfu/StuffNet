@@ -12,6 +12,7 @@ from fast_rcnn.config import cfg
 from fast_rcnn.bbox_transform import bbox_transform
 from utils.cython_bbox import bbox_overlaps
 import PIL
+import os.path as osp
 
 def prepare_roidb(imdb):
     """Enrich the imdb's roidb by adding some derived quantities that
@@ -25,6 +26,7 @@ def prepare_roidb(imdb):
     roidb = imdb.roidb
     for i in xrange(len(imdb.image_index)):
         roidb[i]['image'] = imdb.image_path_at(i)
+        roidb[i]['seg'] = get_seg_path(roidb[i]['image'])
         roidb[i]['width'] = sizes[i][0]
         roidb[i]['height'] = sizes[i][1]
         # need gt_overlaps as a dense array for argmax
@@ -42,6 +44,11 @@ def prepare_roidb(imdb):
         # max overlap > 0 => class should not be zero (must be a fg class)
         nonzero_inds = np.where(max_overlaps > 0)[0]
         assert all(max_classes[nonzero_inds] != 0)
+
+def get_seg_path(im_path):
+    base_path = '/media/TB/deep_context_data/pascal_context_images/%s.ppm'
+    idx = im_path.split('/')[-1][:-4]
+    return (base_path % idx)
 
 def add_bbox_regression_targets(roidb):
     """Add information needed to train bounding-box regressors."""

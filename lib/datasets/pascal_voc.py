@@ -39,7 +39,7 @@ class pascal_voc(imdb):
         # Default to roidb handler
         self._roidb_handler = self.selective_search_roidb
         self._salt = str(uuid.uuid4())
-        self._comp_id = 'comp4'
+        self._comp_id = 'comp3'  # comp3: use voc2010 trainval, comp4: use additional data
 
         # PASCAL specific config options
         self.config = {'cleanup'     : True,
@@ -88,7 +88,7 @@ class pascal_voc(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return os.path.join(cfg.DATA_DIR, 'VOCdevkit' + self._year)
+        return os.path.join(cfg.DATA_DIR, 'VOCdevkit2007')
 
     def gt_roidb(self):
         """
@@ -243,8 +243,8 @@ class pascal_voc(imdb):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
-            print 'Writing {} VOC results file'.format(cls)
             filename = self._get_voc_results_file_template().format(cls)
+            print 'Writing %s VOC results file at %s' % (cls, filename)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
@@ -319,15 +319,16 @@ class pascal_voc(imdb):
 
     def evaluate_detections(self, all_boxes, output_dir):
         self._write_voc_results_file(all_boxes)
-        self._do_python_eval(output_dir)
-        if self.config['matlab_eval']:
-            self._do_matlab_eval(output_dir)
-        if self.config['cleanup']:
-            for cls in self._classes:
-                if cls == '__background__':
-                    continue
-                filename = self._get_voc_results_file_template().format(cls)
-                os.remove(filename)
+        if self._year is '2007' or self._image_set is not 'test':
+            self._do_python_eval(output_dir)
+            if self.config['matlab_eval']:
+                self._do_matlab_eval(output_dir)
+            if self.config['cleanup']:
+                for cls in self._classes:
+                    if cls == '__background__':
+                        continue
+                    filename = self._get_voc_results_file_template().format(cls)
+                    os.remove(filename)
 
     def competition_mode(self, on):
         if on:
