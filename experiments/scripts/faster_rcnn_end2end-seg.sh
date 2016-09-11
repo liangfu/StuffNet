@@ -27,7 +27,7 @@ case $DATASET in
     TRAIN_IMDB="voc_2010_train"
     TEST_IMDB="voc_2010_val"
     PT_DIR="pascal_voc"
-    ITERS=90000
+    ITERS=70000
     ;;
   coco)
     # This is a very long and slow training schedule
@@ -46,12 +46,12 @@ esac
 
 # LOG="experiments/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
 LOG="experiments/logs/faster_rcnn_end2end-seg_${NET}_${EXTRA_ARGS_SLUG}.txt"
-exec &> >(tee -a "$LOG")
+exec &> >(tee "$LOG")
 echo Logging output to "$LOG"
 
 time ./tools/train_net.py --gpu ${GPU_ID} \
   --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver-seg.prototxt \
-  --weights data/imagenet_models/${NET}.v2.caffemodel \
+  --weights data/imagenet_models/seg_vgg_init.caffemodel,data/imagenet_models/${NET}.v2.caffemodel \
   --imdb ${TRAIN_IMDB} \
   --iters ${ITERS} \
   --cfg experiments/cfgs/faster_rcnn_end2end-seg.yml \
@@ -59,7 +59,7 @@ time ./tools/train_net.py --gpu ${GPU_ID} \
 
 set +x
 # NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
-NET_FINAL=output/faster_rcnn_end2end/voc_2010_train/vgg16_faster_rcnn-seg_iter_90000.caffemodel
+NET_FINAL=output/faster_rcnn_end2end/voc_2010_train/vgg16_faster_rcnn-seg_iter_70000.caffemodel
 set -x
 
 time ./tools/test_net.py --gpu ${GPU_ID} \

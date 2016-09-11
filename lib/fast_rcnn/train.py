@@ -42,9 +42,11 @@ class SolverWrapper(object):
 
         self.solver = caffe.SGDSolver(solver_prototxt)
         if pretrained_model is not None:
-            print ('Loading pretrained model '
-                   'weights from {:s}').format(pretrained_model)
-            self.solver.net.copy_from(pretrained_model)
+            models = pretrained_model.split(',')
+            for model in models:
+                print ('Loading pretrained model '
+                       'weights from {:s}').format(model)
+                self.solver.net.copy_from(model)
 
         self.solver_param = caffe_pb2.SolverParameter()
         with open(solver_prototxt, 'rt') as f:

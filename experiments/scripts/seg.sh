@@ -1,10 +1,10 @@
 #!/bin/bash
 # Usage:
-# ./experiments/scripts/faster_rcnn_end2end.sh GPU NET DATASET [options args to {train,test}_net.py]
+# ./experiments/scripts/seg.sh GPU NET DATASET [options args to {train,test}_net.py]
 # DATASET is either pascal_voc or coco.
 #
 # Example:
-# ./experiments/scripts/faster_rcnn_end2end.sh 0 VGG_CNN_M_1024 pascal_voc \
+# ./experiments/scripts/seg.sh 0 VGG_CNN_M_1024 pascal_voc \
 #   --set EXP_DIR foobar RNG_SEED 42 TRAIN.SCALES "[400, 500, 600, 700]"
 
 set -x
@@ -27,7 +27,7 @@ case $DATASET in
     TRAIN_IMDB="voc_2010_train"
     TEST_IMDB="voc_2010_val"
     PT_DIR="pascal_voc"
-    ITERS=70000
+    ITERS=30000
     ;;
   coco)
     # This is a very long and slow training schedule
@@ -45,27 +45,26 @@ case $DATASET in
 esac
 
 # LOG="experiments/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
-LOG="experiments/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt"
+LOG="experiments/logs/seg_${NET}_${EXTRA_ARGS_SLUG}.txt"
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 
-time ./tools/train_net.py --gpu ${GPU_ID} \
-  --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver.prototxt \
-  --weights data/imagenet_models/${NET}.v2.caffemodel \
-  --imdb ${TRAIN_IMDB} \
-  --iters ${ITERS} \
-  --cfg experiments/cfgs/faster_rcnn_end2end.yml \
-  ${EXTRA_ARGS}
+# time ./tools/train_net.py --gpu ${GPU_ID} \
+#   --solver models/seg/solver.prototxt \
+#   --weights output/faster_rcnn_end2end/voc_2010_train/vgg16_faster_rcnn_iter_40000.caffemodel \
+#   --imdb ${TRAIN_IMDB} \
+#   --iters ${ITERS} \
+#   --cfg experiments/cfgs/seg.yml \
+#   ${EXTRA_ARGS}
 
 set +x
-# NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
-NET_FINAL=output/faster_rcnn_end2end/voc_2010_train/vgg16_faster_rcnn_iter_70000.caffemodel
+NET_FINAL=output/seg/voc_2010_train/vgg16_seg_iter_30000.caffemodel
 set -x
 
 time ./tools/test_net.py --gpu ${GPU_ID} \
-  --def models/${PT_DIR}/${NET}/faster_rcnn_end2end/test.prototxt \
+  --def models/seg/test.prototxt \
   --net ${NET_FINAL} \
   --imdb ${TEST_IMDB} \
-  --cfg experiments/cfgs/faster_rcnn_end2end.yml \
+  --cfg experiments/cfgs/seg.yml \
   --comp \
   ${EXTRA_ARGS}

@@ -9,6 +9,7 @@
 
 from fast_rcnn.config import cfg, get_output_dir
 from fast_rcnn.bbox_transform import clip_boxes, bbox_transform_inv
+from roi_data_layer.roidb import get_seg_path
 import argparse
 from utils.timer import Timer
 import numpy as np
@@ -181,7 +182,12 @@ def im_detect(net, im, boxes=None):
         scores = scores[inv_index, :]
         pred_boxes = pred_boxes[inv_index, :]
 
-    return scores, pred_boxes
+    if cfg.TEST.SEG:
+        seg_scores = blobs_out['prob_seg']
+        seg_scores = np.squeeze(seg_scores).transpose((1, 2, 0))
+        return scores, pred_boxes, seg_scores
+    else:
+        return scores, pred_boxes
 
 def vis_detections(im, class_name, dets, thresh=0.3):
     """Visual debugging of detections."""
@@ -234,6 +240,9 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
                  for _ in xrange(imdb.num_classes)]
 
     output_dir = get_output_dir(imdb, net)
+    if cfg.TEST.SEG:
+        n_seg_classes = 11
+        confcounts = np.zeros((n_seg_classes, n_seg_classes))
 
     # timers
     _t = {'im_detect' : Timer(), 'misc' : Timer()}
@@ -255,7 +264,13 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
 
         im = cv2.imread(imdb.image_path_at(i))
         _t['im_detect'].tic()
-        scores, boxes = im_detect(net, im, box_proposals)
+        if cfg.TEST.SEG:
+            seg_gt = cv2.imread(get_seg_path(imdb.image_path_at(i)), -1)
+            if seg_gt is None:
+                print 'Could not read ', get_seg_path(imdb.image_path_at(i))
+            scores, boxes, seg_scores = im_detect(net, im, box_proposals)
+        else:
+            scores, boxes = im_detect(net, im, box_proposals)
         _t['im_detect'].toc()
 
         _t['misc'].tic()
@@ -282,6 +297,26 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
                     keep = np.where(all_boxes[j][i][:, -1] >= image_thresh)[0]
                     all_boxes[j][i] = all_boxes[j][i][keep, :]
         _t['misc'].toc()
+        
+        if cfg.TEST.SEG:
+          # evaluate the segmentation
+          seg_labels = np.argmax(seg_scores, axis=2).astype(int)
+          seg_labels = cv2.resize(seg_labels, (seg_gt.shape[1], seg_gt.shape[0]),
+              interpolation=cv2.INTER_NEAREST)
+          sumim = seg_gt + seg_labels * n_seg_classes
+          hs = np.bincount(sumim.flatten(), minlength=n_seg_classes*n_seg_classes)
+          confcounts += hs.reshape((n_seg_classes, n_seg_classes))
+          print 'Segmentation evaluation'
+          conf = 100.0 * np.divide(confcounts, 1e-20 + confcounts.sum(axis=1))
+          np.save(output_dir + '/seg_confusion.npy', conf)
+          acc = np.zeros(n_seg_classes)
+          for j in xrange(n_seg_classes):
+              gtj  = sum(confcounts[j, :])
+              resj = sum(confcounts[:, j])
+              gtresj = confcounts[j, j]
+              acc[j] = 100.0 * gtresj / (gtj + resj - gtresj)
+          print 'Accuracies', acc
+          print 'Mean accuracy', np.mean(acc)
 
         print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
               .format(i + 1, num_images, _t['im_detect'].average_time,

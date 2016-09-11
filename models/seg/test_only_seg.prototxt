@@ -14,11 +14,21 @@ input_shape {
   dim: 3
 }
 
+layer {name: "im_info_silence" type: "Silence" bottom: "im_info"}
+
 layer {
   name: "conv1_1"
   type: "Convolution"
   bottom: "data"
   top: "conv1_1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 64
     pad: 1
@@ -36,6 +46,14 @@ layer {
   type: "Convolution"
   bottom: "conv1_1"
   top: "conv1_2"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 64
     pad: 1
@@ -64,6 +82,14 @@ layer {
   type: "Convolution"
   bottom: "pool1"
   top: "conv2_1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 128
     pad: 1
@@ -81,6 +107,14 @@ layer {
   type: "Convolution"
   bottom: "conv2_1"
   top: "conv2_2"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 128
     pad: 1
@@ -109,6 +143,14 @@ layer {
   type: "Convolution"
   bottom: "pool2"
   top: "conv3_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 256
     pad: 1
@@ -126,6 +168,14 @@ layer {
   type: "Convolution"
   bottom: "conv3_1"
   top: "conv3_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 256
     pad: 1
@@ -143,6 +193,14 @@ layer {
   type: "Convolution"
   bottom: "conv3_2"
   top: "conv3_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 256
     pad: 1
@@ -171,6 +229,14 @@ layer {
   type: "Convolution"
   bottom: "pool3"
   top: "conv4_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -188,6 +254,14 @@ layer {
   type: "Convolution"
   bottom: "conv4_1"
   top: "conv4_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -205,6 +279,14 @@ layer {
   type: "Convolution"
   bottom: "conv4_2"
   top: "conv4_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -233,6 +315,14 @@ layer {
   type: "Convolution"
   bottom: "pool4"
   top: "conv5_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -250,6 +340,14 @@ layer {
   type: "Convolution"
   bottom: "conv5_1"
   top: "conv5_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -267,6 +365,14 @@ layer {
   type: "Convolution"
   bottom: "conv5_2"
   top: "conv5_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -280,254 +386,13 @@ layer {
   top: "conv5_3"
 }
 
-#========= RPN ============
-
-layer {
-  name: "rpn_conv/3x3"
-  type: "Convolution"
-  bottom: "conv5_3"
-  top: "rpn/output"
-  param { lr_mult: 1.0 decay_mult: 1.0 }
-  param { lr_mult: 2.0 decay_mult: 0 }
-  convolution_param {
-    num_output: 512
-    kernel_size: 3 pad: 1 stride: 1
-    weight_filler { type: "gaussian" std: 0.01 }
-    bias_filler { type: "constant" value: 0 }
-  }
-}
-layer {
-  name: "rpn_relu/3x3"
-  type: "ReLU"
-  bottom: "rpn/output"
-  top: "rpn/output"
-}
-
-layer {
-  name: "rpn_cls_score"
-  type: "Convolution"
-  bottom: "rpn/output"
-  top: "rpn_cls_score"
-  param { lr_mult: 1.0 decay_mult: 1.0 }
-  param { lr_mult: 2.0 decay_mult: 0 }
-  convolution_param {
-    num_output: 18   # 2(bg/fg) * 9(anchors)
-    kernel_size: 1 pad: 0 stride: 1
-    weight_filler { type: "gaussian" std: 0.01 }
-    bias_filler { type: "constant" value: 0 }
-  }
-}
-layer {
-  name: "rpn_bbox_pred"
-  type: "Convolution"
-  bottom: "rpn/output"
-  top: "rpn_bbox_pred"
-  param { lr_mult: 1.0 decay_mult: 1.0 }
-  param { lr_mult: 2.0 decay_mult: 0 }
-  convolution_param {
-    num_output: 36   # 4 * 9(anchors)
-    kernel_size: 1 pad: 0 stride: 1
-    weight_filler { type: "gaussian" std: 0.01 }
-    bias_filler { type: "constant" value: 0 }
-  }
-}
-layer {
-   bottom: "rpn_cls_score"
-   top: "rpn_cls_score_reshape"
-   name: "rpn_cls_score_reshape"
-   type: "Reshape"
-   reshape_param { shape { dim: 0 dim: 2 dim: -1 dim: 0 } }
-}
-
-#========= RoI Proposal ============
-
-layer {
-  name: "rpn_cls_prob"
-  type: "Softmax"
-  bottom: "rpn_cls_score_reshape"
-  top: "rpn_cls_prob"
-}
-layer {
-  name: 'rpn_cls_prob_reshape'
-  type: 'Reshape'
-  bottom: 'rpn_cls_prob'
-  top: 'rpn_cls_prob_reshape'
-  reshape_param { shape { dim: 0 dim: 18 dim: -1 dim: 0 } }
-}
-layer {
-  name: 'proposal'
-  type: 'Python'
-  bottom: 'rpn_cls_prob_reshape'
-  bottom: 'rpn_bbox_pred'
-  bottom: 'im_info'
-  top: 'rois'
-  python_param {
-    module: 'rpn.proposal_layer'
-    layer: 'ProposalLayer'
-    param_str: "'feat_stride': 16"
-  }
-}
-
-#========= RCNN ============
-
-layer {
-  name: "roi_pool5"
-  type: "ROIPooling"
-  bottom: "conv5_3"
-  bottom: "rois"
-  top: "pool5"
-  roi_pooling_param {
-    pooled_w: 7
-    pooled_h: 7
-    spatial_scale: 0.0625 # 1/16
-  }
-}
-layer {
-  name: "fc6"
-  type: "InnerProduct"
-  bottom: "pool5"
-  top: "fc6"
-  inner_product_param {
-    num_output: 4096
-  }
-}
-layer {
-  name: "relu6"
-  type: "ReLU"
-  bottom: "fc6"
-  top: "fc6"
-}
-layer {
-  name: "drop6"
-  type: "Dropout"
-  bottom: "fc6"
-  top: "fc6"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
-}
-layer {
-  name: "fc7"
-  type: "InnerProduct"
-  bottom: "fc6"
-  top: "fc7"
-  inner_product_param {
-    num_output: 4096
-  }
-}
-layer {
-  name: "relu7"
-  type: "ReLU"
-  bottom: "fc7"
-  top: "fc7"
-}
-layer {
-  name: "drop7"
-  type: "Dropout"
-  bottom: "fc7"
-  top: "fc7"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
-}
-layer {
-  name: "bbox_pred"
-  type: "InnerProduct"
-  bottom: "fc7"
-  top: "bbox_pred"
-  inner_product_param {
-    num_output: 84
-  }
-}
-
 ##################################
 # seg
 ##################################
 layer {
-  name: "pool4-seg"
-  type: "Pooling"
-  bottom: "conv4_3"
-  top: "pool4-seg"
-  pooling_param {
-    pool: MAX
-    kernel_size: 2
-    # stride: 2
-    stride: 1
-  }
-}
-layer {
-  name: "conv5_1-seg"
-  type: "Convolution"
-  bottom: "pool4-seg"
-  top: "conv5_1-seg"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  convolution_param {
-    num_output: 512
-    pad: 1
-    kernel_size: 3
-  }
-}
-layer {
-  name: "relu5_1-seg"
-  type: "ReLU"
-  bottom: "conv5_1-seg"
-  top: "conv5_1-seg"
-}
-layer {
-  name: "conv5_2-seg"
-  type: "Convolution"
-  bottom: "conv5_1-seg"
-  top: "conv5_2-seg"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  convolution_param {
-    num_output: 512
-    pad: 1
-    kernel_size: 3
-  }
-}
-layer {
-  name: "relu5_2-seg"
-  type: "ReLU"
-  bottom: "conv5_2-seg"
-  top: "conv5_2-seg"
-}
-layer {
-  name: "conv5_3-seg"
-  type: "Convolution"
-  bottom: "conv5_2-seg"
-  top: "conv5_3-seg"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  convolution_param {
-    num_output: 512
-    pad: 1
-    kernel_size: 3
-  }
-}
-layer {
-  name: "relu5_3-seg"
-  type: "ReLU"
-  bottom: "conv5_3-seg"
-  top: "conv5_3-seg"
-}
-layer {
   name: "fc6-seg"
   type: "Convolution"
-  bottom: "conv5_3-seg"
+  bottom: "conv5_3"
   top: "fc6-seg"
   convolution_param {
     num_output: 1024
@@ -598,43 +463,4 @@ layer {
   type: "Softmax"
   bottom: "fc8_seg_interp"
   top: "prob_seg"
-}
-######### PRED ###################
-layer {
-  name: "roi_pool7-seg"
-  type: "ROIPooling"
-  bottom: "fc7-seg"
-  bottom: "rois"
-  top: "pool7-seg"
-  roi_pooling_param {
-    pooled_w: 7
-    pooled_h: 7
-    spatial_scale: 0.125 # 1/8
-  }
-}
-layer {name: "flatten" type: "Flatten" bottom: "pool7-seg" top: "pool7-seg-flat"}
-layer {
-  name: "concat"
-  type: "Concat"
-  bottom: "fc7"
-  bottom: "pool7-seg-flat"
-  top: "concat"
-  concat_param {
-    axis: 1
-  }
-}
-layer {
-  name: "cls_score-concat"
-  type: "InnerProduct"
-  bottom: "concat"
-  top: "cls_score"
-  inner_product_param {
-    num_output: 21
-  }
-}
-layer {
-  name: "cls_prob"
-  type: "Softmax"
-  bottom: "cls_score"
-  top: "cls_prob"
 }
