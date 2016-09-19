@@ -739,7 +739,7 @@ layer {
 layer {
   name: "fc6_seg"
   type: "Convolution"
-  bottom: "conv5_3_seg"
+  bottom: "pool5_seg"
   top: "fc6_seg"
   param {
     lr_mult: 1

@@ -444,189 +444,159 @@ layer {
 # seg
 ##################################
 layer {
-  name: "pool4-seg"
+  name: "pool4_seg"
   type: "Pooling"
   bottom: "conv4_3"
-  top: "pool4-seg"
+  top: "pool4_seg"
   pooling_param {
     pool: MAX
-    kernel_size: 2
-    # stride: 2
+    kernel_size: 3
     stride: 1
+    pad: 1
   }
 }
 layer {
-  name: "conv5_1-seg"
+  name: "conv5_1_seg"
   type: "Convolution"
-  bottom: "pool4-seg"
-  top: "conv5_1-seg"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
+  bottom: "pool4_seg"
+  top: "conv5_1_seg"
   convolution_param {
     num_output: 512
-    pad: 1
+    pad: 2
+    dilation: 2
     kernel_size: 3
   }
 }
 layer {
-  name: "relu5_1-seg"
+  name: "relu5_1_seg"
   type: "ReLU"
-  bottom: "conv5_1-seg"
-  top: "conv5_1-seg"
+  bottom: "conv5_1_seg"
+  top: "conv5_1_seg"
 }
 layer {
-  name: "conv5_2-seg"
+  name: "conv5_2_seg"
   type: "Convolution"
-  bottom: "conv5_1-seg"
-  top: "conv5_2-seg"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
+  bottom: "conv5_1_seg"
+  top: "conv5_2_seg"
   convolution_param {
     num_output: 512
-    pad: 1
+    pad: 2
+    dilation: 2
     kernel_size: 3
   }
 }
 layer {
-  name: "relu5_2-seg"
+  name: "relu5_2_seg"
   type: "ReLU"
-  bottom: "conv5_2-seg"
-  top: "conv5_2-seg"
+  bottom: "conv5_2_seg"
+  top: "conv5_2_seg"
 }
 layer {
-  name: "conv5_3-seg"
+  name: "conv5_3_seg"
   type: "Convolution"
-  bottom: "conv5_2-seg"
-  top: "conv5_3-seg"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
+  bottom: "conv5_2_seg"
+  top: "conv5_3_seg"
   convolution_param {
     num_output: 512
-    pad: 1
+    pad: 2
+    dilation: 2
     kernel_size: 3
   }
 }
 layer {
-  name: "relu5_3-seg"
+  name: "relu5_3_seg"
   type: "ReLU"
-  bottom: "conv5_3-seg"
-  top: "conv5_3-seg"
+  bottom: "conv5_3_seg"
+  top: "conv5_3_seg"
 }
 layer {
-  name: "fc6-seg"
+  name: "pool5_seg"
+  type: "Pooling"
+  bottom: "conv5_3_seg"
+  top: "pool5_seg"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 1
+    pad: 1
+  }
+}
+layer {
+  name: "fc6_seg"
   type: "Convolution"
-  bottom: "conv5_3-seg"
-  top: "fc6-seg"
+  bottom: "pool5_seg"
+  top: "fc6_seg"
   convolution_param {
     num_output: 1024
-    pad: 1
     kernel_size: 3
+    dilation: 12
+    pad: 12
   }
 }
 layer {
-  name: "relu6-seg"
+  name: "relu6_seg"
   type: "ReLU"
-  bottom: "fc6-seg"
-  top: "fc6-seg"
+  bottom: "fc6_seg"
+  top: "fc6_seg"
 }
 layer {
-  name: "drop6-seg"
+  name: "drop6_seg"
   type: "Dropout"
-  bottom: "fc6-seg"
-  top: "fc6-seg"
+  bottom: "fc6_seg"
+  top: "fc6_seg"
   dropout_param {
     dropout_ratio: 0.5
   }
 }
 layer {
-  name: "fc7-seg"
+  name: "fc7_seg"
   type: "Convolution"
-  bottom: "fc6-seg"
-  top: "fc7-seg"
+  bottom: "fc6_seg"
+  top: "fc7_seg"
   convolution_param {
-    num_output: 512
+    num_output: 1024
     kernel_size: 1
   }
 }
 layer {
-  name: "relu7-seg"
+  name: "relu7_seg"
   type: "ReLU"
-  bottom: "fc7-seg"
-  top: "fc7-seg"
+  bottom: "fc7_seg"
+  top: "fc7_seg"
 }
 layer {
-  name: "drop7-seg"
+  name: "drop7_seg"
   type: "Dropout"
-  bottom: "fc7-seg"
-  top: "fc7-seg"
+  bottom: "fc7_seg"
+  top: "fc7_seg"
   dropout_param {
     dropout_ratio: 0.5
   }
 }
 layer {
-  name: "fc8-seg"
+  name: "fc8_seg"
   type: "Convolution"
-  bottom: "fc7-seg"
-  top: "fc8-seg"
+  bottom: "fc7_seg"
+  top: "fc8_seg"
   convolution_param {
     # number of output classes
-    num_output: 11
+    num_output: 31
     kernel_size: 1
   }
 }
 layer {
   name: "fc8_seg_interp"
   type: "Interp"
-  bottom: "fc8-seg"
+  bottom: "fc8_seg"
   bottom: "data"
   top: "fc8_seg_interp"
 }
-layer {
-  name: "prob_seg"
-  type: "Softmax"
-  bottom: "fc8_seg_interp"
-  top: "prob_seg"
-}
+
 ######### PRED ###################
 layer {
-  name: "roi_pool7-seg"
-  type: "ROIPooling"
-  bottom: "fc7-seg"
-  bottom: "rois"
-  top: "pool7-seg"
-  roi_pooling_param {
-    pooled_w: 7
-    pooled_h: 7
-    spatial_scale: 0.125 # 1/8
-  }
-}
-layer {name: "flatten" type: "Flatten" bottom: "pool7-seg" top: "pool7-seg-flat"}
-layer {
-  name: "concat"
-  type: "Concat"
-  bottom: "fc7"
-  bottom: "pool7-seg-flat"
-  top: "concat"
-  concat_param {
-    axis: 1
-  }
-}
-layer {
-  name: "cls_score-concat"
+  name: "cls_score"
   type: "InnerProduct"
-  bottom: "concat"
+  bottom: "fc7"
   top: "cls_score"
   inner_product_param {
     num_output: 21
@@ -637,4 +607,11 @@ layer {
   type: "Softmax"
   bottom: "cls_score"
   top: "cls_prob"
+}
+
+layer {
+  name: "prob_seg"
+  type: "Softmax"
+  bottom: "fc8_seg_interp"
+  top: "prob_seg"
 }

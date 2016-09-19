@@ -16,6 +16,7 @@ import os
 
 from caffe.proto import caffe_pb2
 import google.protobuf as pb2
+from IPython.core.debugger import Tracer
 
 class SolverWrapper(object):
     """A simple wrapper around Caffe's solver.

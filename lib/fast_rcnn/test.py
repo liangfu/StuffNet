@@ -152,7 +152,9 @@ def im_detect(net, im, boxes=None):
         forward_kwargs['im_info'] = blobs['im_info'].astype(np.float32, copy=False)
     else:
         forward_kwargs['rois'] = blobs['rois'].astype(np.float32, copy=False)
+    print 'Start fwd'
     blobs_out = net.forward(**forward_kwargs)
+    print 'End fwd'
 
     if cfg.TEST.HAS_RPN:
         assert len(im_scales) == 1, "Only single-image batch implemented"
@@ -241,7 +243,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
 
     output_dir = get_output_dir(imdb, net)
     if cfg.TEST.SEG:
-        n_seg_classes = 11
+        n_seg_classes = 31
         confcounts = np.zeros((n_seg_classes, n_seg_classes))
 
     # timers
