@@ -546,91 +546,6 @@ layer {
     spatial_scale: 0.0625 # 1/16
   }
 }
-layer {
-  name: "fc6"
-  type: "InnerProduct"
-  bottom: "pool5"
-  top: "fc6"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 4096
-  }
-}
-layer {
-  name: "relu6"
-  type: "ReLU"
-  bottom: "fc6"
-  top: "fc6"
-}
-layer {
-  name: "drop6"
-  type: "Dropout"
-  bottom: "fc6"
-  top: "fc6"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
-}
-layer {
-  name: "fc7"
-  type: "InnerProduct"
-  bottom: "fc6"
-  top: "fc7"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 4096
-  }
-}
-layer {
-  name: "relu7"
-  type: "ReLU"
-  bottom: "fc7"
-  top: "fc7"
-}
-layer {
-  name: "drop7"
-  type: "Dropout"
-  bottom: "fc7"
-  top: "fc7"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
-}
-
-layer {
-  name: "bbox_pred"
-  type: "InnerProduct"
-  bottom: "fc7"
-  top: "bbox_pred"
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 84
-    weight_filler {
-      type: "gaussian"
-      std: 0.001
-    }
-    bias_filler {
-      type: "constant"
-      value: 0
-    }
-  }
-}
-
 ##################################
 # seg
 ##################################
@@ -737,6 +652,18 @@ layer {
   }
 }
 layer {
+  name: "roi_pool5_seg"
+  type: "ROIPooling"
+  bottom: "conv5_3_seg"
+  bottom: "rois"
+  top: "roi_pool5_seg"
+  roi_pooling_param {
+    pooled_w: 7
+    pooled_h: 7
+    spatial_scale: 0.125 # 1/8
+  }
+}
+layer {
   name: "fc6_seg"
   type: "Convolution"
   bottom: "pool5_seg"
@@ -819,15 +746,13 @@ layer {
   }
   convolution_param {
     # number of output classes
-    num_output: 31
+    num_output: 10
     kernel_size: 1
     weight_filler {
-      type: "gaussian"
-      std: 0.01
+      type: "xavier"
     }
     bias_filler {
       type: "constant"
-      value: 0
     }
   }
 }
@@ -838,6 +763,105 @@ layer {
   bottom: "seg"
   top: "fc8_seg_interp"
 }
+
+##################################
+# fc
+##################################
+layer {
+  name: "eltwise"
+  type: "Eltwise"
+  bottom: "pool5"
+  bottom: "roi_pool5_seg"
+  top: "pool5_combined"
+  eltwise_param {
+    operation: SUM
+    coeff: 0.5
+    coeff: 0.5
+  }
+}
+layer {
+  name: "fc6"
+  type: "InnerProduct"
+  bottom: "pool5_combined"
+  top: "fc6"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu6"
+  type: "ReLU"
+  bottom: "fc6"
+  top: "fc6"
+}
+layer {
+  name: "drop6"
+  type: "Dropout"
+  bottom: "fc6"
+  top: "fc6"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7"
+  type: "InnerProduct"
+  bottom: "fc6"
+  top: "fc7"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu7"
+  type: "ReLU"
+  bottom: "fc7"
+  top: "fc7"
+}
+layer {
+  name: "drop7"
+  type: "Dropout"
+  bottom: "fc7"
+  top: "fc7"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer {
+  name: "bbox_pred"
+  type: "InnerProduct"
+  bottom: "fc7"
+  top: "bbox_pred"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 84
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
 
 ######### LOSS ###################
 layer {
@@ -854,12 +878,10 @@ layer {
   inner_product_param {
     num_output: 21
     weight_filler {
-      type: "gaussian"
-      std: 0.01
+      type: "xavier"
     }
     bias_filler {
       type: "constant"
-      value: 0
     }
   }
 }

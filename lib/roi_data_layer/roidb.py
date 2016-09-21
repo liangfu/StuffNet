@@ -13,6 +13,7 @@ from fast_rcnn.bbox_transform import bbox_transform
 from utils.cython_bbox import bbox_overlaps
 import PIL
 import os.path as osp
+from IPython.core.debugger import Tracer
 
 def prepare_roidb(imdb):
     """Enrich the imdb's roidb by adding some derived quantities that
@@ -46,7 +47,8 @@ def prepare_roidb(imdb):
         assert all(max_classes[nonzero_inds] != 0)
 
 def get_seg_path(im_path):
-    base_path = '/media/TB/deep_context_data/pascal_context_images/%s.ppm'
+    base_path = '/media/TB/deep_context_data/pascal_context_images_%d/%s.ppm'
+    base_path = base_path % (cfg.SEG_CLASSES, '%s')
     idx = im_path.split('/')[-1][:-4]
     return (base_path % idx)
 
