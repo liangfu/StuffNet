@@ -27,7 +27,7 @@ def prepare_roidb(imdb):
     roidb = imdb.roidb
     for i in xrange(len(imdb.image_index)):
         roidb[i]['image'] = imdb.image_path_at(i)
-        roidb[i]['seg'] = get_seg_path(roidb[i]['image'])
+        roidb[i]['seg'] = get_seg_path(imdb._data_path, roidb[i]['image'])
         roidb[i]['width'] = sizes[i][0]
         roidb[i]['height'] = sizes[i][1]
         # need gt_overlaps as a dense array for argmax
@@ -46,8 +46,8 @@ def prepare_roidb(imdb):
         nonzero_inds = np.where(max_overlaps > 0)[0]
         assert all(max_classes[nonzero_inds] != 0)
 
-def get_seg_path(im_path):
-    base_path = '/media/TB/deep_context_data/pascal_context_images_%d/%s.ppm'
+def get_seg_path(data_path, im_path):
+    base_path = data_path + '/context_images_%d/%s.ppm'
     base_path = base_path % (cfg.SEG_CLASSES, '%s')
     idx = im_path.split('/')[-1][:-4]
     return (base_path % idx)
