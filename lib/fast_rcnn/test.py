@@ -19,6 +19,7 @@ from fast_rcnn.nms_wrapper import nms
 import cPickle
 from utils.blob import im_list_to_blob
 import os
+from IPython.core.debugger import Tracer
 
 def _get_image_blob(im):
     """Converts an image into a network input.
@@ -267,9 +268,9 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
         im = cv2.imread(imdb.image_path_at(i))
         _t['im_detect'].tic()
         if cfg.TEST.SEG:
-            seg_gt = cv2.imread(get_seg_path(imdb.image_path_at(i)), -1)
+            seg_gt = cv2.imread(get_seg_path(imdb._data_path, imdb.image_path_at(i)), -1)
             if seg_gt is None:
-                print 'Could not read ', get_seg_path(imdb.image_path_at(i))
+                print 'Could not read ', get_seg_path(imdb._data_path, imdb.image_path_at(i))
             scores, boxes, seg_scores = im_detect(net, im, box_proposals)
         else:
             scores, boxes = im_detect(net, im, box_proposals)
