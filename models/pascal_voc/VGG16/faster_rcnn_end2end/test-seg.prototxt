@@ -527,106 +527,21 @@ layer {
     dropout_ratio: 0.5
   }
 }
-###########
-## parsenet
-###########
-layer {
-  name: "fc7_seg_norm"
-  type: "Normalize"
-  bottom: "fc7_seg"
-  top: "fc7_seg_norm"
-  norm_param {
-    scale_filler {
-      type: "constant"
-      value: 10
-    }
-    across_spatial: false
-    channel_shared: false
-    fix_scale: false
-  }
-}
-layer {
-  name: "pool7_seg"
-  type: "Pooling"
-  bottom: "fc7_seg"
-  top: "pool7_seg"
-  pooling_param {
-    pool: AVE
-    global_pooling: true
-  }
-}
-layer {
-  name: "pool7_seg_norm"
-  type: "Normalize"
-  bottom: "pool7_seg"
-  top: "pool7_seg_norm"
-  norm_param {
-    scale_filler {
-      type: "constant"
-      value: 10
-    }
-    across_spatial: false
-    channel_shared: false
-    fix_scale: false
-  }
-}
-layer {
-  name: "pool7_seg_norm_drop"
-  type: "Dropout"
-  bottom: "pool7_seg_norm"
-  top: "pool7_seg_norm"
-  dropout_param {
-    dropout_ratio: 0.3
-  }
-}
 layer {
   name: "fc8_seg"
   type: "Convolution"
-  bottom: "fc7_seg_norm"
+  bottom: "fc7_seg"
   top: "fc8_seg"
   convolution_param {
     # number of output classes
-    num_output: 30
+    num_output: 10
     kernel_size: 1
-  }
-}
-layer {
-  name: "fc8_seg_1x1"
-  type: "Convolution"
-  bottom: "pool7_seg_norm"
-  top: "fc8_seg_1x1"
-  convolution_param {
-    # number of output classes
-    num_output: 30
-    kernel_size: 1
-  }
-}
-layer {
-  name: "fc8_seg_1x1_unpool"
-  type: "UnPooling"
-  bottom: "fc8_seg_1x1"
-  bottom: "fc8_seg"
-  top: "fc8_seg_1x1_unpool"
-  unpooling_param {
-    unpool: REP
-    out_kernel_size: 0
-    out_stride: 0
-  }
-}
-layer {
-  name: "fc8_seg_combine"
-  type: "Eltwise"
-  bottom: "fc8_seg_1x1_unpool"
-  bottom: "fc8_seg"
-  top: "fc8_seg_combine"
-  eltwise_param {
-    operation: SUM
   }
 }
 layer {
   name: "fc8_seg_interp"
   type: "Interp"
-  bottom: "fc8_seg_combine"
+  bottom: "fc8_seg"
   bottom: "data"
   top: "fc8_seg_interp"
 }
