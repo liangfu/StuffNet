@@ -1,5 +1,5 @@
 EXP_DIR: faster_rcnn_end2end
-SEG_CLASSES: 10
+SEG_CLASSES: 30
 TRAIN:
   HAS_RPN: True
   IMS_PER_BATCH: 1

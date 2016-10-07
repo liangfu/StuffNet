@@ -1,10 +1,17 @@
 name: "VGG_ILSVRC_16_layers"
+
 input: "data"
 input_shape {
   dim: 1
   dim: 3
   dim: 224
   dim: 224
+}
+
+input: "im_info"
+input_shape {
+  dim: 1
+  dim: 3
 }
 
 layer {
@@ -210,7 +217,6 @@ layer {
   bottom: "conv4_3"
   top: "conv4_3"
 }
-
 ##################################
 # seg
 ##################################
@@ -351,7 +357,7 @@ layer {
   top: "fc8_seg"
   convolution_param {
     # number of output classes
-    num_output: 30
+    num_output: 10
     kernel_size: 1
   }
 }
@@ -363,7 +369,7 @@ layer {
   top: "fc8_seg_interp"
 }
 
-######### PROB ###################
+######### PRED ###################
 layer {
   name: "prob_seg"
   type: "Softmax"
