@@ -534,7 +534,7 @@ layer {
   top: "fc8_seg"
   convolution_param {
     # number of output classes
-    num_output: 10
+    num_output: 30
     kernel_size: 1
   }
 }

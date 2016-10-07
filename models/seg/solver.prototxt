@@ -2,8 +2,8 @@ train_net: "models/seg/train.prototxt"
 base_lr: 1e-3
 lr_policy: "step"
 gamma: 0.1
-stepsize: 10000
-display: 100
+stepsize: 50000
+display: 20
 average_loss: 100
 # iter_size: 1
 momentum: 0.9

@@ -27,7 +27,7 @@ case $DATASET in
     TRAIN_IMDB="voc_2010_train"
     TEST_IMDB="voc_2010_val"
     PT_DIR="pascal_voc"
-    ITERS=30000
+    ITERS=70000
     ;;
   coco)
     # This is a very long and slow training schedule
@@ -51,14 +51,14 @@ echo Logging output to "$LOG"
 
 # time ./tools/train_net.py --gpu ${GPU_ID} \
 #   --solver models/seg/solver.prototxt \
-#   --weights output/faster_rcnn_end2end/voc_2010_train/vgg16_faster_rcnn_iter_40000.caffemodel \
+#   --weights data/imagenet_models/seg_vgg_init.caffemodel,data/imagenet_models/${NET}.v2.caffemodel \
 #   --imdb ${TRAIN_IMDB} \
 #   --iters ${ITERS} \
 #   --cfg experiments/cfgs/seg.yml \
 #   ${EXTRA_ARGS}
 
 set +x
-NET_FINAL=output/seg/voc_2010_train/vgg16_seg_iter_30000.caffemodel
+NET_FINAL=output/seg/voc_2010_train/vgg16_seg_iter_70000.caffemodel
 set -x
 
 time ./tools/test_net.py --gpu ${GPU_ID} \

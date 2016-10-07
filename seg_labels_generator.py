@@ -14,7 +14,7 @@ class SegLabelsGenerator:
     self.year = year
     
     # paths
-    devkit_path = '/media/TB/VOCdevkit/VOC{:s}/'.format(self.year)
+    devkit_path = 'data/VOCdevkit2007/VOC{:s}/'.format(self.year)
     self.im_path = osp.join(devkit_path, 'JPEGImages')
     self.seg_path = osp.join(devkit_path, 'context_images_30')
     self.mean_pixel = np.array([102.9801, 115.9465, 122.7717])  # BGR
@@ -25,7 +25,6 @@ class SegLabelsGenerator:
         caffe.TEST)
 
   def get_seg(self, im):
-    Tracer()()
     im_in = np.zeros((1, im.shape[2], im.shape[0], im.shape[1]),
         dtype=np.float32)
     im_in[0, :, :, :] = (im.astype(np.float32) -
@@ -38,6 +37,7 @@ class SegLabelsGenerator:
     probs = probs['prob_seg']
     probs = np.squeeze(probs).transpose((1, 2, 0))
     labels = np.argmax(probs, axis=2).astype(np.uint8)
+    return labels
 
   def save_segs(self):
     # get list of images
@@ -56,7 +56,7 @@ class SegLabelsGenerator:
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
-    print 'Usage: python argv[0] year'
+    print 'Usage: python {:s} year'.format(sys.argv[0])
     sys.exit(-1)
 
   lg = SegLabelsGenerator(sys.argv[1])

@@ -746,7 +746,7 @@ layer {
   }
   convolution_param {
     # number of output classes
-    num_output: 10
+    num_output: 30
     kernel_size: 1
     weight_filler {
       type: "xavier"
