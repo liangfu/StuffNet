@@ -291,8 +291,8 @@ def voc_eval_sizes(detpath,
 
     # area_ranges = [[0**2, 32**2], [32**2, 96**2], [96**2, 1e5**2], [0**2, 1e5**2]]
     # area_range_names = ['small', 'medium', 'large', 'all']
-    area_ranges = [[96**2, 1e5**2]]
-    area_range_names = ['large']
+    area_ranges = [[0**2, 32**2]]
+    area_range_names = ['small']
     for area_range, area_range_name in zip(area_ranges, area_range_names):
         min_area = area_range[0]
         max_area = area_range[1]
