@@ -4,6 +4,7 @@ import sys
 import caffe
 import cv2
 import glob
+import matplotlib.pyplot as plt
 from IPython.core.debugger import Tracer
 
 caffe.set_mode_gpu()
@@ -55,9 +56,21 @@ class SegLabelsGenerator:
       cv2.imwrite(seg_filename, seg)
 
 if __name__ == '__main__':
+  # if len(sys.argv) != 2:
+  #   print 'Usage: python {:s} year'.format(sys.argv[0])
+  #   sys.exit(-1)
+
+  # lg = SegLabelsGenerator(sys.argv[1])
+  # lg.save_segs()
+
   if len(sys.argv) != 2:
-    print 'Usage: python {:s} year'.format(sys.argv[0])
+    print 'Usage: python {:s} image'.format(sys.argv[0])
     sys.exit(-1)
 
-  lg = SegLabelsGenerator(sys.argv[1])
-  lg.save_segs()
+  lg = SegLabelsGenerator('2010')
+  im = cv2.imread(sys.argv[1])
+  if im is None:
+    print 'Could not read ', sys.argv[1]
+    sys.exit(-1)
+  labels = lg.get_seg(im)
+  plt.imshow(labels)
