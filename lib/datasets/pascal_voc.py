@@ -281,12 +281,12 @@ class pascal_voc(imdb):
             if cls == '__background__':
                 continue
             filename = self._get_voc_results_file_template().format(cls)
-            # rec, prec, ap = voc_eval(
-            #     filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
-            #     use_07_metric=use_07_metric)
-            rec, prec, ap = voc_eval_sizes(
+            rec, prec, ap = voc_eval(
                 filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
                 use_07_metric=use_07_metric)
+            # rec, prec, ap = voc_eval_sizes(
+            #     filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
+            #     use_07_metric=use_07_metric)
             aps += [ap]
             print('AP for {} = {:.4f}'.format(cls, ap))
             with open(os.path.join(output_dir, cls + '_pr.pkl'), 'w') as f:
@@ -295,7 +295,7 @@ class pascal_voc(imdb):
         print('~~~~~~~~')
         print('Results:')
         for ap in aps:
-            print('{:.1f}'.format(ap))
+            print '{:.1f} &'.format(ap),
         print('{:.1f}'.format(np.mean(aps)))
         print('~~~~~~~~')
         print('')
