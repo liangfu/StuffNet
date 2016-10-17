@@ -208,7 +208,7 @@ __C.USE_GPU_NMS = True
 
 # Default GPU device id
 __C.GPU_ID = 0
-__C.SEG_CLASSES = 10
+__C.SEG_CLASSES = 30
 
 
 def get_output_dir(imdb, net=None):

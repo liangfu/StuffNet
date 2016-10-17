@@ -36,6 +36,7 @@ class pascal_voc(imdb):
                          'sheep', 'sofa', 'train', 'tvmonitor')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
+        self._seg_ext = '.ppm'
         self._image_index = self._load_image_set_index()
         # Default to roidb handler
         self._roidb_handler = self.selective_search_roidb
@@ -61,6 +62,12 @@ class pascal_voc(imdb):
         """
         return self.image_path_from_index(self._image_index[i])
 
+    def seg_path_at(self, i):
+        """
+        Return the absolute path to seg i in the image sequence.
+        """
+        return self.seg_path_from_index(self._image_index[i])
+
     def image_path_from_index(self, index):
         """
         Construct an image path from the image's "index" identifier.
@@ -69,6 +76,15 @@ class pascal_voc(imdb):
                                   index + self._image_ext)
         assert os.path.exists(image_path), \
                 'Path does not exist: {}'.format(image_path)
+        return image_path
+
+    def seg_path_from_index(self, index):
+        """
+        Construct a seg path from the image's "index" identifier.
+        """
+        image_path = os.path.join(self._data_path,
+            'context_images_{:d}'.format(cfg.SEG_CLASSES),
+            index + self._seg_ext)
         return image_path
 
     def _load_image_set_index(self):

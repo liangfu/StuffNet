@@ -153,9 +153,7 @@ def im_detect(net, im, boxes=None):
         forward_kwargs['im_info'] = blobs['im_info'].astype(np.float32, copy=False)
     else:
         forward_kwargs['rois'] = blobs['rois'].astype(np.float32, copy=False)
-    print 'Start fwd'
     blobs_out = net.forward(**forward_kwargs)
-    print 'End fwd'
 
     if cfg.TEST.HAS_RPN:
         assert len(im_scales) == 1, "Only single-image batch implemented"

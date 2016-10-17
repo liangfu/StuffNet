@@ -1,5 +1,5 @@
 name: "VGG_ILSVRC_16_layers"
-
+#
 input: "data"
 input_shape {
   dim: 1
@@ -370,6 +370,22 @@ layer {
 }
 
 ######### PRED ###################
+# layer {
+#   name: "crf"
+#   type: "DenseCRF"
+#   bottom: "fc8_seg_interp"
+#   bottom: "data"
+#   top: "prob_seg"
+#   dense_crf_param { 
+#     max_iter: 10
+#     pos_w: 3
+#     pos_xy_std: 3
+#     bi_w: 5
+#     bi_xy_std: 50
+#     bi_rgb_std: 10
+#   }
+# }
+
 layer {
   name: "prob_seg"
   type: "Softmax"

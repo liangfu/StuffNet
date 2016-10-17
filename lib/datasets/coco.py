@@ -106,6 +106,12 @@ class coco(imdb):
         """
         return self.image_path_from_index(self._image_index[i])
 
+    def seg_path_at(self, i):
+        """
+        Return the absolute path to seg image i in the image sequence.
+        """
+        return self.seg_path_from_index(self._image_index[i])
+
     def image_path_from_index(self, index):
         """
         Construct an image path from the image's "index" identifier.
@@ -118,6 +124,19 @@ class coco(imdb):
                               self._data_name, file_name)
         assert osp.exists(image_path), \
                 'Path does not exist: {}'.format(image_path)
+        return image_path
+
+    def seg_path_from_index(self, index):
+        """
+        Construct a seg path from the image's "index" identifier.
+        """
+        # Example image path for index=119993:
+        #   images/train2014/COCO_train2014_000000119993.jpg
+        file_name = ('COCO_' + self._data_name + '_' +
+                     str(index).zfill(12) + '.ppm')
+        image_path = osp.join(self._data_path,
+            'context_images_{:d}'.format(cfg.SEG_CLASSES),
+            self._data_name, file_name)
         return image_path
 
     def selective_search_roidb(self):
