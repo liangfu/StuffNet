@@ -27,8 +27,8 @@ class SegLabelsGenerator:
     self.mean_pixel = np.array([102.9801, 115.9465, 122.7717])  # BGR
 
     # net
-    self.net = caffe.Net('../models/seg/deploy.prototxt',
-        '../output/faster_rcnn_end2end/voc_2010_trainval/stuffnet_simple_30.caffemodel',
+    self.net = caffe.Net('../models/seg/deploy_wacv.prototxt',
+        '../output/faster_rcnn_end2end/voc_2010_trainval/stuffnet_simple_10.caffemodel',
         caffe.TEST)
 
   def get_seg(self, im):
@@ -47,7 +47,6 @@ class SegLabelsGenerator:
     return labels
 
   def save_segs(self):
-    Tracer()()
     for count, im_idx in enumerate(self.D._image_index):
       if count % 100 == 0:
         print 'Image {:d} of {:d}'.format(count, len(self.D._image_index))
