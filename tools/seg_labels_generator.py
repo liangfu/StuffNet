@@ -59,6 +59,38 @@ class SegLabelsGenerator:
       seg = self.get_seg(im);
       cv2.imwrite(seg_filename, seg)
 
+  def coco_modify_segs(self):
+    for count, im_idx in enumerate(self.D._image_index):
+      if count % 100 == 0:
+        print 'Image {:d} of {:d}'.format(count, len(self.D._image_index))
+      seg_filename = self.D.seg_path_from_index(im_idx)
+      seg = cv2.imread(seg_filename, -1)
+      if seg is None:
+        print 'Could not read', seg_filename
+
+      # get annotations
+      c = self.D._COCO
+      ann_ids = c.getAnnIds(imgIds=im_idx, iscrowd=False)
+      anns = c.loadAnns(ann_ids)
+      mask = np.zeros(seg.shape, dtype=np.int)
+      for ann in anns:
+        if 'segmentation' not in ann:
+          continue
+        # TODO verify 9
+        cat_id = ann['category_id'] + 9
+        if type(ann['segmentation']) == list:
+          for s in ann['segmentation']:
+            poly = np.array(s).reshape((len(seg)/2, 2))
+            poly = Polygon(poly)
+            pth = path.Path(poly.get_xy(), closed=True)
+            y, x = np.mgrid[:seg.shape[0], :seg.shape[1]]
+            points = np.transpose((x.ravel(), y.ravel()))
+            m = pth.contains_points(points)
+            mask += (cat_id * m)
+        else:
+          Tracer()()
+
+
 if __name__ == '__main__':
   if len(sys.argv) != 4:
     print 'Usage: python {:s} dataset split year'.format(sys.argv[0])
