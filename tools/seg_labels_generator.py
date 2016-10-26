@@ -1,9 +1,8 @@
+import _init_paths
 import numpy as np
-import os.path as osp
 import sys
 import caffe
 import cv2
-import _init_paths
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib import path
@@ -49,22 +48,22 @@ class SegLabelsGenerator:
     return labels
 
   def save_segs(self):
-    for count, im_idx in enumerate(self.D._image_index):
+    for count, im_idx in enumerate(self.D.image_index):
       if count % 100 == 0:
-        print 'Image {:d} of {:d}'.format(count, len(self.D._image_index))
+        print 'Image {:d} of {:d}'.format(count, len(self.D.image_index))
       im_filename = self.D.image_path_from_index(im_idx)
       seg_filename = self.D.seg_path_from_index(im_idx)
       im = cv2.imread(im_filename)
       if im is None:
         print 'Could not read ', im_filename
         sys.exit(-1)
-      seg = self.get_seg(im);
+      seg = self.get_seg(im)
       cv2.imwrite(seg_filename, seg)
 
   def coco_modify_segs(self):
-    for count, im_idx in enumerate(self.D._image_index):
+    for count, im_idx in enumerate(self.D.image_index):
       if count % 100 == 0:
-        print 'Image {:d} of {:d}'.format(count, len(self.D._image_index))
+        print 'Image {:d} of {:d}'.format(count, len(self.D.image_index))
       seg_filename = self.D.seg_path_from_index(im_idx)
       seg = cv2.imread(seg_filename, -1)
       if seg is None:
