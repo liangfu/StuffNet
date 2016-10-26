@@ -5,6 +5,8 @@ import caffe
 import cv2
 import _init_paths
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+from matplotlib import path
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from IPython.core.debugger import Tracer
@@ -76,19 +78,20 @@ class SegLabelsGenerator:
       for ann in anns:
         if 'segmentation' not in ann:
           continue
-        # TODO verify 9
         cat_id = ann['category_id'] + 9
         if type(ann['segmentation']) == list:
           for s in ann['segmentation']:
-            poly = np.array(s).reshape((len(seg)/2, 2))
+            poly = np.array(s).reshape((len(s)/2, 2))
             poly = Polygon(poly)
             pth = path.Path(poly.get_xy(), closed=True)
             y, x = np.mgrid[:seg.shape[0], :seg.shape[1]]
             points = np.transpose((x.ravel(), y.ravel()))
-            m = pth.contains_points(points)
-            mask += (cat_id * m)
+            m = pth.contains_points(points).reshape(mask.shape)
+            mask[m > 0] = cat_id * m[m > 0]
         else:
           Tracer()()
+      # superimpose mask on seg
+      seg[mask > 0] = mask[mask > 0]
 
 
 if __name__ == '__main__':
@@ -97,7 +100,7 @@ if __name__ == '__main__':
     sys.exit(-1)
 
   lg = SegLabelsGenerator(sys.argv[1], sys.argv[2], sys.argv[3])
-  lg.save_segs()
+  lg.coco_modify_segs()
 
   # if len(sys.argv) != 2:
   #   print 'Usage: python {:s} image'.format(sys.argv[0])
