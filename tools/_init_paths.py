@@ -7,6 +7,7 @@
 
 """Set up paths for Fast R-CNN."""
 
+import os
 import os.path as osp
 import sys
 
@@ -17,7 +18,8 @@ def add_path(path):
 this_dir = osp.dirname(__file__)
 
 # Add caffe to PYTHONPATH
-caffe_path = osp.join(this_dir, '..', 'caffe-fast-rcnn', 'python')
+# caffe_path = osp.join(this_dir, '..', 'caffe-fast-rcnn', 'python')
+caffe_path = osp.join(os.environ['HOME'], 'libraries', 'caffe')
 add_path(caffe_path)
 
 # Add lib to PYTHONPATH
