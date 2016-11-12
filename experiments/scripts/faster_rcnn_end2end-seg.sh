@@ -49,17 +49,17 @@ LOG="experiments/logs/faster_rcnn_end2end-seg_${NET}_${EXTRA_ARGS_SLUG}.txt"
 exec &> >(tee "$LOG")
 echo Logging output to "$LOG"
 
-# time ./tools/train_net.py --gpu ${GPU_ID} \
-#   --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver-seg.prototxt \
-#   --weights data/imagenet_models/seg_vgg_init.caffemodel,data/imagenet_models/${NET}.v2.caffemodel \
-#   --imdb ${TRAIN_IMDB} \
-#   --iters ${ITERS} \
-#   --cfg experiments/cfgs/faster_rcnn_end2end-seg.yml \
-#   ${EXTRA_ARGS}
+time ./tools/train_net.py --gpu ${GPU_ID} \
+  --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver-seg.prototxt \
+  --weights data/imagenet_models/seg_vgg_init.caffemodel,data/imagenet_models/${NET}.v2.caffemodel \
+  --imdb ${TRAIN_IMDB} \
+  --iters ${ITERS} \
+  --cfg experiments/cfgs/faster_rcnn_end2end-seg.yml \
+  ${EXTRA_ARGS}
 
 set +x
 # NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
-NET_FINAL=output/faster_rcnn_end2end/voc_2010_train/vgg16_faster_rcnn-seg_iter_70000.caffemodel
+NET_FINAL=output/faster_rcnn_end2end/coco_2014_train/vgg16_faster_rcnn-seg_iter_490000.caffemodel
 set -x
 
 time ./tools/test_net.py --gpu ${GPU_ID} \
