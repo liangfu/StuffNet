@@ -3,12 +3,13 @@ import os.path as osp
 import sys
 import caffe
 import cv2
-import _init_paths
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib import path
+import _init_paths
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
+from fast_rcnn.config import cfg
 from IPython.core.debugger import Tracer
 
 caffe.set_mode_gpu()
@@ -29,8 +30,10 @@ class SegLabelsGenerator:
     self.mean_pixel = np.array([102.9801, 115.9465, 122.7717])  # BGR
 
     # net
-    self.net = caffe.Net('../models/seg/deploy_wacv.prototxt',
-        '../output/faster_rcnn_end2end/voc_2010_trainval/stuffnet_simple_10.caffemodel',
+    model_file = '../output/faster_rcnn_end2end/voc_2010_trainval/'+\
+        'stuffnet_simple_{:d}.caffemodel'.format(cfg.SEG_CLASSES)
+    print 'Using {:s}'.format(model_file)
+    self.net = caffe.Net('../models/seg/deploy_wacv.prototxt', model_file,
         caffe.TEST)
 
   def get_seg(self, im):
@@ -65,10 +68,13 @@ class SegLabelsGenerator:
     for count, im_idx in enumerate(self.D._image_index):
       if count % 100 == 0:
         print 'Image {:d} of {:d}'.format(count, len(self.D._image_index))
+      im_filename = self.D.image_path_from_index(im_idx)
       seg_filename = self.D.seg_path_from_index(im_idx)
-      seg = cv2.imread(seg_filename, -1)
-      if seg is None:
-        print 'Could not read', seg_filename
+      im = cv2.imread(im_filename)
+      if im is None:
+        print 'Could not read ', im_filename
+        sys.exit(-1)
+      seg = self.get_seg(im);
 
       # get annotations
       c = self.D._COCO
@@ -92,7 +98,7 @@ class SegLabelsGenerator:
           Tracer()()
       # superimpose mask on seg
       seg[mask > 0] = mask[mask > 0]
-
+      cv2.imwrite(seg_filename, seg)
 
 if __name__ == '__main__':
   if len(sys.argv) != 4:
