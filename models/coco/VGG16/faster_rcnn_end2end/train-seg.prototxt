@@ -554,12 +554,10 @@ layer {
   bottom: "pool4_seg"
   top: "conv5_1_seg"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0.1
   }
   param {
-    lr_mult: 2
-    decay_mult: 0
+    lr_mult: 0.2
   }
   convolution_param {
     num_output: 512
@@ -580,12 +578,10 @@ layer {
   bottom: "conv5_1_seg"
   top: "conv5_2_seg"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0.1
   }
   param {
-    lr_mult: 2
-    decay_mult: 0
+    lr_mult: 0.2
   }
   convolution_param {
     num_output: 512
@@ -606,12 +602,10 @@ layer {
   bottom: "conv5_2_seg"
   top: "conv5_3_seg"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0.1
   }
   param {
-    lr_mult: 2
-    decay_mult: 0
+    lr_mult: 0.2
   }
   convolution_param {
     num_output: 512
@@ -656,12 +650,10 @@ layer {
   bottom: "pool5_seg"
   top: "fc6_seg"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0.1
   }
   param {
-    lr_mult: 2
-    decay_mult: 0
+    lr_mult: 0.2
   }
   convolution_param {
     num_output: 1024
@@ -676,27 +668,25 @@ layer {
   bottom: "fc6_seg"
   top: "fc6_seg"
 }
-layer {
-  name: "drop6_seg"
-  type: "Dropout"
-  bottom: "fc6_seg"
-  top: "fc6_seg"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
-}
+# layer {
+#   name: "drop6_seg"
+#   type: "Dropout"
+#   bottom: "fc6_seg"
+#   top: "fc6_seg"
+#   dropout_param {
+#     dropout_ratio: 0.5
+#   }
+# }
 layer {
   name: "fc7_seg"
   type: "Convolution"
   bottom: "fc6_seg"
   top: "fc7_seg"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0.1
   }
   param {
-    lr_mult: 2
-    decay_mult: 0
+    lr_mult: 0.2
   }
   convolution_param {
     num_output: 1024
@@ -709,27 +699,25 @@ layer {
   bottom: "fc7_seg"
   top: "fc7_seg"
 }
-layer {
-  name: "drop7_seg"
-  type: "Dropout"
-  bottom: "fc7_seg"
-  top: "fc7_seg"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
-}
+# layer {
+#   name: "drop7_seg"
+#   type: "Dropout"
+#   bottom: "fc7_seg"
+#   top: "fc7_seg"
+#   dropout_param {
+#     dropout_ratio: 0.5
+#   }
+# }
 layer {
   name: "fc8_seg"
   type: "Convolution"
   bottom: "fc7_seg"
   top: "fc8_seg"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0.1
   }
   param {
-    lr_mult: 2
-    decay_mult: 0
+    lr_mult: 0.2
   }
   convolution_param {
     # number of output classes

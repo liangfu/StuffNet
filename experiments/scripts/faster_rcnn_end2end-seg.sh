@@ -33,7 +33,7 @@ case $DATASET in
     # This is a very long and slow training schedule
     # You can probably use fewer iterations and reduce the
     # time to the LR drop (set in the solver to 350,000 iterations).
-    TRAIN_IMDB="coco_2014_train"
+    TRAIN_IMDB="coco_2014_train+coco_2014_val"
     TEST_IMDB="coco_2014_minival"
     PT_DIR="coco"
     ITERS=490000

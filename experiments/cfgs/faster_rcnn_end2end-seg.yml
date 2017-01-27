@@ -1,5 +1,7 @@
 EXP_DIR: faster_rcnn_end2end
 SEG_CLASSES: 90
+MODELS_DIR: /home/samarth/research/py-faster-rcnn/models/coco
+RNG_SEED: 77
 TRAIN:
   HAS_RPN: True
   IMS_PER_BATCH: 1
