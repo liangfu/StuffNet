@@ -16,6 +16,7 @@ from roi_data_layer.minibatch import get_minibatch
 import numpy as np
 import yaml
 from multiprocessing import Process, Queue
+import cv2
 
 class RoIDataLayer(caffe.Layer):
     """Fast R-CNN data layer used for training."""
@@ -148,6 +149,11 @@ class RoIDataLayer(caffe.Layer):
     def forward(self, bottom, top):
         """Get blobs and copy them into this layer's top blob vector."""
         blobs = self._get_next_minibatch()
+
+        #### visualize minibatch
+        # seg = np.squeeze(blobs['seg']).astype(np.uint8)
+        # cv2.imshow('seg', seg)
+        # [exit(0) if cv2.waitKey()&0xff==27 else None]
 
         for blob_name, blob in blobs.iteritems():
             top_ind = self._name_to_top_map[blob_name]
