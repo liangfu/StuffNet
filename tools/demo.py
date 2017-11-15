@@ -192,7 +192,7 @@ if __name__ == '__main__':
     prototxt = os.path.join(cfg.MODELS_DIR, NETS[args.demo_net][0],
                             'faster_rcnn_end2end', 'test-seg.prototxt')
     caffemodel = os.path.join(cfg.ROOT_DIR, 'output', 'faster_rcnn_end2end',
-                              'voc_2010_trainval', NETS[args.demo_net][1])
+                              'voc_2012_trainval', NETS[args.demo_net][1])
 
     if not os.path.isfile(caffemodel):
         raise IOError(('{:s} not found.\nDid you run ./data/script/'

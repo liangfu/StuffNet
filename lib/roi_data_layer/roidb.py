@@ -47,9 +47,12 @@ def prepare_roidb(imdb):
         assert all(max_classes[nonzero_inds] != 0)
 
 def get_seg_path(data_path, im_path):
-    base_path = data_path + '/context_images_%d/%s.ppm'
-    base_path = base_path % (cfg.SEG_CLASSES, '%s')
+    # base_path = data_path + '/context_images_%d/%s.ppm'
+    # base_path = base_path % (cfg.SEG_CLASSES, '%s')
     idx = im_path.split('/')[-1][:-4]
+    base_path = osp.join(data_path, "SegmentationClass", "%s.png")
+    if idx.find("leftImg8bit")>0:
+        idx = idx.replace("leftImg8bit","gtFine_labelTrainIds")
     return (base_path % idx)
 
 def add_bbox_regression_targets(roidb):

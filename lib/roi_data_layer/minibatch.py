@@ -165,7 +165,7 @@ def _get_seg_blob(roidb, scale_inds):
     for i in xrange(num_images):
         im = cv2.imread(roidb[i]['seg'], -1)
         if im is None:
-          print 'Could not read ', roidb[i]['seg']
+            raise IOError('Could not read '+roidb[i]['seg'])
         if roidb[i]['flipped']:
             im = im[:, ::-1]
         target_size = cfg.TRAIN.SCALES[scale_inds[i]]

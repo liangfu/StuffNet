@@ -190,24 +190,31 @@ def im_detect(net, im, boxes=None):
     else:
         return scores, pred_boxes
 
-def vis_detections(im, class_name, dets, thresh=0.3):
+def vis_detections(im, class_name, dets, thresh=0.7):
     """Visual debugging of detections."""
-    import matplotlib.pyplot as plt
-    im = im[:, :, (2, 1, 0)]
-    for i in xrange(np.minimum(10, dets.shape[0])):
-        bbox = dets[i, :4]
-        score = dets[i, -1]
+    import cv2
+    import random
+    color_white = (255, 255, 255)
+    disp = im.copy()
+    flag = False
+    for det in dets:
+        bbox = det[:4] * 1.
+        score = det[-1]
+        bbox = map(int, bbox)
+        print(bbox)
         if score > thresh:
-            plt.cla()
-            plt.imshow(im)
-            plt.gca().add_patch(
-                plt.Rectangle((bbox[0], bbox[1]),
-                              bbox[2] - bbox[0],
-                              bbox[3] - bbox[1], fill=False,
-                              edgecolor='g', linewidth=3)
-                )
-            plt.title('{}  {:.3f}'.format(class_name, score))
-            plt.show()
+            cv2.rectangle(disp, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color=color_white, thickness=2)
+            flag = True
+            text = '%s %.3f' % (class_name, score)
+            fontFace = cv2.FONT_HERSHEY_PLAIN
+            fontScale = 1
+            thickness = 1
+            textSize, baseLine = cv2.getTextSize(text, fontFace, fontScale, thickness)
+            cv2.rectangle(disp, (bbox[0], bbox[1]-textSize[1]), (bbox[0]+textSize[0], bbox[1]), color=(128,0,0), thickness=-1)
+            cv2.putText(disp, text, (bbox[0], bbox[1]), color=color_white, fontFace=fontFace, fontScale=fontScale, thickness=thickness)
+    if flag:
+        cv2.imshow("result_"+class_name, disp)
+        [exit(0) if cv2.waitKey()&0xff==27 else None]
 
 def apply_nms(all_boxes, thresh):
     """Apply non-maximum suppression to all predicted boxes output by the
