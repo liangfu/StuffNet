@@ -615,7 +615,7 @@ layer {
   bottom: "fc7"
   top: "bbox_pred"
   inner_product_param {
-    num_output: 84
+    num_output: 36
   }
 }
 
