@@ -534,7 +534,7 @@ layer {
   top: "fc8_seg"
   convolution_param {
     # number of output classes
-    num_output: 30
+    num_output: 19
     kernel_size: 1
   }
 }
@@ -627,7 +627,7 @@ layer {
   bottom: "fc7"
   top: "cls_score"
   inner_product_param {
-    num_output: 21
+    num_output: 9
   }
 }
 layer {

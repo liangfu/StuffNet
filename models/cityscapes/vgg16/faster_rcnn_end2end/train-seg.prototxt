@@ -9,7 +9,7 @@ layer {
   python_param {
     module: 'roi_data_layer.layer'
     layer: 'RoIDataLayer'
-    param_str: "'num_classes': 21"
+    param_str: "'num_classes': 9"
   }
 }
 
@@ -528,7 +528,7 @@ layer {
   python_param {
     module: 'rpn.proposal_target_layer'
     layer: 'ProposalTargetLayer'
-    param_str: "'num_classes': 21"
+    param_str: "'num_classes': 9"
   }
 }
 
@@ -746,7 +746,7 @@ layer {
   }
   convolution_param {
     # number of output classes
-    num_output: 30
+    num_output: 19
     kernel_size: 1
     weight_filler {
       type: "xavier"
@@ -876,7 +876,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 21
+    num_output: 9
     weight_filler {
       type: "xavier"
     }
