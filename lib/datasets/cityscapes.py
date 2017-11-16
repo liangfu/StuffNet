@@ -29,7 +29,7 @@ class cityscapes(imdb):
                             else devkit_path
         self._data_path = os.path.join(self._devkit_path, 'Cityscapes')
         self._classes = ('__background__', # always index 0
-                         'traffic light', 'traffic sign', 'person',
+                         'person',
                          'rider', 'car', 'truck', 'bus', 'train',
                          'motorcyle', 'bicycle')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
