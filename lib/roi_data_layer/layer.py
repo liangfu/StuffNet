@@ -154,6 +154,8 @@ class RoIDataLayer(caffe.Layer):
         # seg = np.squeeze(blobs['seg']).astype(np.uint8)
         # cv2.imshow('seg', seg)
         # [exit(0) if cv2.waitKey()&0xff==27 else None]
+        if blobs['gt_boxes'].shape[0]==0:
+            return
 
         for blob_name, blob in blobs.iteritems():
             top_ind = self._name_to_top_map[blob_name]

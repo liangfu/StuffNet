@@ -8,6 +8,7 @@ average_loss: 100
 # iter_size: 1
 momentum: 0.9
 weight_decay: 0.0005
+debug_info: false
 # We disable standard caffe solver snapshotting and implement our own snapshot
 # function
 snapshot: 0

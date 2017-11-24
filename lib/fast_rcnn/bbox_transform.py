@@ -6,6 +6,7 @@
 # --------------------------------------------------------
 
 import numpy as np
+import warnings
 
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
@@ -20,8 +21,9 @@ def bbox_transform(ex_rois, gt_rois):
 
     targets_dx = (gt_ctr_x - ex_ctr_x) / ex_widths
     targets_dy = (gt_ctr_y - ex_ctr_y) / ex_heights
-    targets_dw = np.log(gt_widths / ex_widths)
-    targets_dh = np.log(gt_heights / ex_heights)
+    eps = np.array([1e-5])
+    targets_dw = np.log(np.maximum(eps,gt_widths) / np.maximum(eps,ex_widths))
+    targets_dh = np.log(np.maximum(eps,gt_heights) / np.maximum(eps,ex_heights))
 
     targets = np.vstack(
         (targets_dx, targets_dy, targets_dw, targets_dh)).transpose()

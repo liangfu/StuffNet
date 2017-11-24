@@ -579,6 +579,8 @@ layer {
     pad: 2
     dilation: 2
     kernel_size: 3
+    weight_filler { type: "gaussian" std: 0.01 }
+    bias_filler { type: "constant" value: 0 }
   }
 }
 layer {
@@ -605,6 +607,8 @@ layer {
     pad: 2
     dilation: 2
     kernel_size: 3
+    weight_filler { type: "gaussian" std: 0.01 }
+    bias_filler { type: "constant" value: 0 }
   }
 }
 layer {
@@ -631,6 +635,8 @@ layer {
     pad: 2
     dilation: 2
     kernel_size: 3
+    weight_filler { type: "gaussian" std: 0.01 }
+    bias_filler { type: "constant" value: 0 }
   }
 }
 layer {
@@ -681,6 +687,8 @@ layer {
     kernel_size: 3
     dilation: 12
     pad: 12
+    weight_filler { type: "gaussian" std: 0.01 }
+    bias_filler { type: "constant" value: 0 }
   }
 }
 layer {
@@ -714,6 +722,8 @@ layer {
   convolution_param {
     num_output: 1024
     kernel_size: 1
+    weight_filler { type: "gaussian" std: 0.01 }
+    bias_filler { type: "constant" value: 0 }
   }
 }
 layer {
@@ -907,10 +917,62 @@ layer {
 }
 
 layer {
+  name: "fc8_seg_interp_reshaped"
+  type: "Reshape"
+  bottom: "fc8_seg_interp"
+  top: "fc8_seg_interp_reshaped"
+  reshape_param {
+    shape {
+      dim: 19
+      dim: -1 # infer it from the other dimensions
+    }
+  }
+}
+
+layer {
+  name: "seg_reshaped"
+  type: "Reshape"
+  bottom: "seg"
+  top: "seg_reshaped"
+  reshape_param {
+    shape {
+      dim: 1  # copy the dimension from below
+      dim: -1 # infer it from the other dimensions
+    }
+  }
+}
+
+layer {
+  name: "fc8_seg_interp_permuted"
+  type: "Permute"
+  bottom: "fc8_seg_interp_reshaped"
+  top: "fc8_seg_interp_permuted"
+  permute_param {
+    order: 1
+    order: 0
+  }
+}
+
+layer {
+  name: "seg_permuted"
+  type: "Permute"
+  bottom: "seg_reshaped"
+  top: "seg_permuted"
+  permute_param {
+    order: 1
+    order: 0
+  }
+}
+
+layer {
   name: "loss_seg"
   type: "SoftmaxWithLoss"
-  bottom: "fc8_seg_interp"
-  bottom: "seg"
+  bottom: "fc8_seg_interp_permuted"
+  bottom: "seg_permuted"
   top: "loss_seg"
   loss_weight: 1
+  loss_param {
+    ignore_label: 255
+    normalization: VALID
+  }
 }
