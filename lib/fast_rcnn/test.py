@@ -190,7 +190,7 @@ def im_detect(net, im, boxes=None):
     else:
         return scores, pred_boxes
 
-def vis_detections(im, class_name, dets, thresh=0.7):
+def vis_detections(im, class_name, dets, thresh=0.07):
     """Visual debugging of detections."""
     import cv2
     import random
@@ -215,6 +215,51 @@ def vis_detections(im, class_name, dets, thresh=0.7):
     if flag:
         cv2.imshow("result_"+class_name, disp)
         [exit(0) if cv2.waitKey()&0xff==27 else None]
+
+def vis_segmentation(im, seg_labels):
+    disp = (seg_labels*10).astype(np.uint8)
+    cv2.imshow("result", disp)
+    [exit(0) if cv2.waitKey()&0xff==27 else None]
+
+def vis_all_detection(im_array, detections, class_names, scale):
+    """
+    visualize all detections in one image
+    :param im_array: [b=1 c h w] in rgb
+    :param detections: [ numpy.ndarray([[x1 y1 x2 y2 score]]) for j in classes ]
+    :param class_names: list of names in imdb
+    :param scale: visualize the scaled image
+    :return:
+    """
+    disp = draw_all_detection(im_array, detections, class_names, scale)
+    cv2.imshow("result", disp)
+    [exit(0) if cv2.waitKey()&0xff==27 else None]
+
+def draw_all_detection(im_array, detections, class_names, scale):
+    """
+    visualize all detections in one image
+    :param im_array: [b=1 c h w] in rgb
+    :param detections: [ numpy.ndarray([[x1 y1 x2 y2 score]]) for j in classes ]
+    :param class_names: list of names in imdb
+    :param scale: visualize the scaled image
+    :return:
+    """
+    color_white = (255, 255, 255)
+    im = im_array
+    color = (0,0,192)
+    for j, det in enumerate(detections):
+        bbox = det[:4] * scale
+        score = det[-1]
+        bbox = map(int, bbox)
+        cv2.rectangle(im, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color=color, thickness=2)
+        text = '%s %.3f' % (class_names[j], score)
+        fontFace = cv2.FONT_HERSHEY_PLAIN
+        fontScale = 1
+        thickness = 1
+        textSize, baseLine = cv2.getTextSize(text, fontFace, fontScale, thickness)
+        cv2.rectangle(im, (bbox[0], bbox[1]-textSize[1]), (bbox[0]+textSize[0], bbox[1]), color=(128,0,0), thickness=-1)
+        cv2.putText(im, text, (bbox[0], bbox[1]),
+                    color=color_white, fontFace=fontFace, fontScale=fontScale, thickness=thickness)
+    return im
 
 def apply_nms(all_boxes, thresh):
     """Apply non-maximum suppression to all predicted boxes output by the
@@ -271,6 +316,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
             box_proposals = roidb[i]['boxes'][roidb[i]['gt_classes'] == 0]
 
         im = cv2.imread(imdb.image_path_at(i))
+        im = cv2.resize(im, (1024, 512), interpolation=cv2.INTER_LINEAR)
         _t['im_detect'].tic()
         if cfg.TEST.SEG:
             seg_gt = cv2.imread(get_seg_path(imdb._data_path, imdb.image_path_at(i)), -1)
@@ -291,9 +337,28 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
                 .astype(np.float32, copy=False)
             keep = nms(cls_dets, cfg.TEST.NMS)
             cls_dets = cls_dets[keep, :]
-            if vis:
-                vis_detections(im, imdb.classes[j], cls_dets)
+            # if vis:
+            #     vis_detections(im, imdb.classes[j], cls_dets)
             all_boxes[j][i] = cls_dets
+            
+        if vis:
+            classinfo = np.argmax(scores[:,:],axis=1)
+            indices = np.where(classinfo>0)[0]
+            # indices = np.arange(100)
+            detections = []
+            class_names = []
+            for ind in indices.tolist():
+                cls = classinfo[ind]
+                box = boxes[ind,cls*4:cls*4+4]
+                score = scores[ind,cls]
+                detections.append(box.tolist()+[score])
+                class_names.append(imdb.classes[cls])
+            detections = np.array(detections,np.float32)
+            # indices = nms(detections, cfg.TEST.NMS, force_cpu=True)
+            # if len(indices)>0:
+            #     detections = detections[indices,:]
+            #     class_names = [class_names[j] for j in indices]
+            vis_all_detection(im, detections, class_names, 1.0)
 
         # Limit to max_per_image detections *over all classes*
         if max_per_image > 0:
@@ -311,20 +376,22 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
           seg_labels = np.argmax(seg_scores, axis=2).astype(int)
           seg_labels = cv2.resize(seg_labels, (seg_gt.shape[1], seg_gt.shape[0]),
               interpolation=cv2.INTER_NEAREST)
-          sumim = seg_gt + seg_labels * n_seg_classes
-          hs = np.bincount(sumim.flatten(), minlength=n_seg_classes*n_seg_classes)
-          confcounts += hs.reshape((n_seg_classes, n_seg_classes))
-          print 'Segmentation evaluation'
-          conf = 100.0 * np.divide(confcounts, 1e-20 + confcounts.sum(axis=1))
-          np.save(output_dir + '/seg_confusion.npy', conf)
-          acc = np.zeros(n_seg_classes)
-          for j in xrange(n_seg_classes):
-              gtj  = sum(confcounts[j, :])
-              resj = sum(confcounts[:, j])
-              gtresj = confcounts[j, j]
-              acc[j] = 100.0 * gtresj / (gtj + resj - gtresj)
-          print 'Accuracies', acc
-          print 'Mean accuracy', np.mean(acc)
+          if vis:
+              vis_segmentation(im, seg_labels)
+          # sumim = seg_gt + seg_labels * n_seg_classes
+          # hs = np.bincount(sumim.flatten(), minlength=n_seg_classes*n_seg_classes)
+          # confcounts += hs.reshape((n_seg_classes, n_seg_classes))
+          # print 'Segmentation evaluation'
+          # conf = 100.0 * np.divide(confcounts, 1e-20 + confcounts.sum(axis=1))
+          # np.save(output_dir + '/seg_confusion.npy', conf)
+          # acc = np.zeros(n_seg_classes)
+          # for j in xrange(n_seg_classes):
+          #     gtj  = sum(confcounts[j, :])
+          #     resj = sum(confcounts[:, j])
+          #     gtresj = confcounts[j, j]
+          #     acc[j] = 100.0 * gtresj / (gtj + resj - gtresj)
+          # print 'Accuracies', acc
+          # print 'Mean accuracy', np.mean(acc)
 
         print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
               .format(i + 1, num_images, _t['im_detect'].average_time,
