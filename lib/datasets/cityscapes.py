@@ -226,10 +226,10 @@ class cityscapes(imdb):
                 continue
             bbox = obj.find('bndbox')
             # Make pixel indexes 0-based
-            x1 = float(bbox.find('xmin').text) - 1
-            y1 = float(bbox.find('ymin').text) - 1
-            x2 = float(bbox.find('xmax').text) - 1
-            y2 = float(bbox.find('ymax').text) - 1
+            x1 = float(bbox.find('xmin').text)*2 - 1
+            y1 = float(bbox.find('ymin').text)*2 - 1
+            x2 = float(bbox.find('xmax').text)*2 - 1
+            y2 = float(bbox.find('ymax').text)*2 - 1
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
             overlaps[ix, cls] = 1.0
