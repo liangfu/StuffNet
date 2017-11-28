@@ -12,12 +12,15 @@ from fast_rcnn.config import cfg
 import roi_data_layer.roidb as rdl_roidb
 from utils.timer import Timer
 import numpy as np
-import os
+import os, sys
+import cv2
 
 from caffe.proto import caffe_pb2
 import google.protobuf as pb2
 import google.protobuf.text_format
 from IPython.core.debugger import Tracer
+
+DEBUG = False
 
 class SolverWrapper(object):
     """A simple wrapper around Caffe's solver.
@@ -104,6 +107,29 @@ class SolverWrapper(object):
             timer.tic()
             self.solver.step(1)
             timer.toc()
+
+            if DEBUG:
+                img = self.solver.net.blobs['data'].data.astype(np.uint8)
+                seg = self.solver.net.blobs['seg'].data.astype(np.uint8)
+                im_info = self.solver.net.blobs['im_info'].data.astype(np.int32)
+                gt_boxes = self.solver.net.blobs['gt_boxes'].data.astype(np.int32)
+                
+                img = np.squeeze(img)
+                img = (img + np.array([103.939, 116.779, 123.68]).reshape((3,1,1)))
+                img = np.swapaxes(img, 1, 2)
+                img = np.swapaxes(img, 0, 2).astype(np.uint8)
+
+                disp = img.copy()
+                for bbox in gt_boxes:
+                    print bbox
+                    cv2.rectangle(disp, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color=(255,127,127), thickness=2)
+                
+                cv2.imshow("image", disp)
+                [exit(0) if cv2.waitKey()&0xff==27 else None]
+                
+                print(self.solver.net.blobs['rpn_rois'].data[:5,:].astype(np.int32))
+                if self.solver.iter>=4: exit(0)
+            
             if self.solver.iter % (10 * self.solver_param.display) == 0:
                 print 'speed: {:.3f}s / iter'.format(timer.average_time)
 
