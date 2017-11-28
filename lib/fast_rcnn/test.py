@@ -343,8 +343,8 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
             
         if vis:
             classinfo = np.argmax(scores[:,:],axis=1)
-            indices = np.where(classinfo>0)[0]
-            # indices = np.arange(100)
+            # indices = np.where(classinfo>0)[0]
+            indices = np.arange(100)
             detections = []
             class_names = []
             for ind in indices.tolist():
@@ -358,6 +358,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
             # if len(indices)>0:
             #     detections = detections[indices,:]
             #     class_names = [class_names[j] for j in indices]
+            print(detections.astype(np.int32))
             vis_all_detection(im, detections, class_names, 1.0)
 
         # Limit to max_per_image detections *over all classes*

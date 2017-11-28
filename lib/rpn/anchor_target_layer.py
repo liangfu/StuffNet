@@ -87,7 +87,7 @@ class AnchorTargetLayer(caffe.Layer):
             print 'scale: {}'.format(im_info[2])
             print 'height, width: ({}, {})'.format(height, width)
             print 'rpn: gt_boxes.shape', gt_boxes.shape
-            print 'rpn: gt_boxes', gt_boxes
+            print 'rpn: gt_boxes', gt_boxes.astype(np.int32)
 
         # 1. Generate proposals from bbox deltas and shifted anchors
         shift_x = np.arange(0, width) * self._feat_stride
@@ -199,6 +199,9 @@ class AnchorTargetLayer(caffe.Layer):
             self._counts += np.sum(labels == 1)
             means = self._sums / self._counts
             stds = np.sqrt(self._squared_sums / self._counts - means ** 2)
+            print 'bbox_targets:',bbox_targets.shape
+            print bbox_targets[labels==1,:10].astype(np.float32)
+            print means
             print 'means:'
             print means
             print 'stdevs:'
