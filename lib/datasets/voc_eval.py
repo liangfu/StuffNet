@@ -128,7 +128,7 @@ def voc_eval(detpath,
         bbox = np.array([x['bbox'] for x in R])
         difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
         det = [False] * len(R)
-        npos = npos + 1 # sum(~difficult)
+        npos = npos + difficult.shape[0] # sum(~difficult)
         class_recs[imagename] = {'bbox': bbox,
                                  'difficult': difficult,
                                  'det': det}
@@ -178,6 +178,7 @@ def voc_eval(detpath,
                    (BBGT[:, 3] - BBGT[:, 1] + 1.) - inters)
 
             overlaps = inters / uni
+            assert np.amax(overlaps)>=0.0 and np.amin(overlaps)<=1.0
             ovmax = np.max(overlaps)
             jmax = np.argmax(overlaps)
 
@@ -203,6 +204,9 @@ def voc_eval(detpath,
     prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
     ap = voc_ap(rec, prec, use_07_metric)
 
+    if ap>100.:
+        import pdb; pdb.set_trace()
+    
     return rec, prec, ap
 
 def voc_eval_sizes(detpath,
