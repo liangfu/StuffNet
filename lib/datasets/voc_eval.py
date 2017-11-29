@@ -27,6 +27,8 @@ def parse_rec(filename):
                               int(bbox.find('ymax').text)]
         obj_struct['area'] = (obj_struct['bbox'][2] - obj_struct['bbox'][0]) *\
                              (obj_struct['bbox'][3] - obj_struct['bbox'][1])
+        if obj_struct['area']<100:
+            continue
         objects.append(obj_struct)
 
     return objects

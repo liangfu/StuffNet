@@ -394,14 +394,26 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
           #     acc[j] = 100.0 * gtresj / (gtj + resj - gtresj)
           # print 'Accuracies', acc
           # print 'Mean accuracy', np.mean(acc)
+          resname = get_seg_path(imdb._data_path, imdb.image_path_at(i))
+          resname = resname.replace("SegmentationClass","results").replace("labelTrainIds","results")
+          lut = np.zeros(256)
+          lut[:19]=np.array([7,8,11,12,13,17,19,20,21,22,23,24,25,26,27,28,31,32,33])
+          seg_labels = cv2.LUT(seg_labels.astype(np.uint8),lut)
+          if cv2.imwrite(resname, seg_labels):
+              print("segmentationResult: "+resname)
+          else:
+              raise Exception("Fail to write segmentation result: "+resname)
 
         print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
               .format(i + 1, num_images, _t['im_detect'].average_time,
                       _t['misc'].average_time)
+        # if i>10: break
 
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
+    # with open(det_file, 'rb') as f:
+    #     all_boxes = cPickle.load(f)
 
     print 'Evaluating detections'
     imdb.evaluate_detections(all_boxes, output_dir)
