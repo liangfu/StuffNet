@@ -190,7 +190,7 @@ def im_detect(net, im, boxes=None):
     else:
         return scores, pred_boxes
 
-def vis_detections(im, class_name, dets, thresh=0.07):
+def vis_detections(im, class_name, dets, thresh=0.7):
     """Visual debugging of detections."""
     import cv2
     import random
@@ -336,15 +336,16 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
             cls_dets = np.hstack((cls_boxes, cls_scores[:, np.newaxis])) \
                 .astype(np.float32, copy=False)
             keep = nms(cls_dets, cfg.TEST.NMS)
-            cls_dets = cls_dets[keep, :]
+            cls_dets = cls_dets[keep, :].astype(np.int32)
             # if vis:
             #     vis_detections(im, imdb.classes[j], cls_dets)
+            # print cls_dets
             all_boxes[j][i] = cls_dets
             
         if vis:
             classinfo = np.argmax(scores[:,:],axis=1)
-            # indices = np.where(classinfo>0)[0]
-            indices = np.arange(100)
+            indices = np.where(classinfo>0)[0]
+            # indices = np.arange(100)
             detections = []
             class_names = []
             for ind in indices.tolist():
@@ -354,11 +355,11 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
                 detections.append(box.tolist()+[score])
                 class_names.append(imdb.classes[cls])
             detections = np.array(detections,np.float32)
-            # indices = nms(detections, cfg.TEST.NMS, force_cpu=True)
-            # if len(indices)>0:
-            #     detections = detections[indices,:]
-            #     class_names = [class_names[j] for j in indices]
-            print(detections.astype(np.int32))
+            if True: # enable NMS
+                indices = nms(detections, cfg.TEST.NMS)
+                if len(indices)>0:
+                    detections = detections[indices,:]
+                    class_names = [class_names[j] for j in indices]
             vis_all_detection(im, detections, class_names, 1.0)
 
         # Limit to max_per_image detections *over all classes*
@@ -375,10 +376,10 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
         if cfg.TEST.SEG:
           # evaluate the segmentation
           seg_labels = np.argmax(seg_scores, axis=2).astype(int)
-          seg_labels = cv2.resize(seg_labels, (seg_gt.shape[1], seg_gt.shape[0]),
-              interpolation=cv2.INTER_NEAREST)
           if vis:
               vis_segmentation(im, seg_labels)
+          seg_labels = cv2.resize(seg_labels, (seg_gt.shape[1], seg_gt.shape[0]),
+              interpolation=cv2.INTER_NEAREST)
           # sumim = seg_gt + seg_labels * n_seg_classes
           # hs = np.bincount(sumim.flatten(), minlength=n_seg_classes*n_seg_classes)
           # confcounts += hs.reshape((n_seg_classes, n_seg_classes))
@@ -393,14 +394,26 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
           #     acc[j] = 100.0 * gtresj / (gtj + resj - gtresj)
           # print 'Accuracies', acc
           # print 'Mean accuracy', np.mean(acc)
+          resname = get_seg_path(imdb._data_path, imdb.image_path_at(i))
+          resname = resname.replace("SegmentationClass","results").replace("labelTrainIds","results")
+          lut = np.zeros(256)
+          lut[:19]=np.array([7,8,11,12,13,17,19,20,21,22,23,24,25,26,27,28,31,32,33])
+          seg_labels = cv2.LUT(seg_labels.astype(np.uint8),lut)
+          if cv2.imwrite(resname, seg_labels):
+              print("segmentationResult: "+resname)
+          else:
+              raise Exception("Fail to write segmentation result: "+resname)
 
         print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
               .format(i + 1, num_images, _t['im_detect'].average_time,
                       _t['misc'].average_time)
+        # if i>10: break
 
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
+    # with open(det_file, 'rb') as f:
+    #     all_boxes = cPickle.load(f)
 
     print 'Evaluating detections'
     imdb.evaluate_detections(all_boxes, output_dir)
