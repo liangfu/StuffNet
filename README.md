@@ -1,4 +1,9 @@
-This is my fork of Ross Girshick's [py-faster-rcnn](https://github.com/rbgirshick/py-faster-rcnn) and has code and models for the WACV 2017 paper [StuffNet: Using 'Stuff' to Improve Object Detection](https://arxiv.org/abs/1610.05861).
+This is my fork of Samarth Brahmbhatt's [py-faster-rcnn](https://github.com/samarth-robo/py-faster-rcnn),
+which implemented StuffNet for joint object detection and semantic segmentation.
+The repository has been modified to support training with the [Cityscapes dataset](https://www.cityscapes-dataset.com)
+for joint object detection and semantic segmentation.
+
+This was also Samarth Brahmbhatt's fork of Ross Girshick's [py-faster-rcnn](https://github.com/rbgirshick/py-faster-rcnn) and has code and models for the WACV 2017 paper [StuffNet: Using 'Stuff' to Improve Object Detection](https://arxiv.org/abs/1610.05861).
 
 Please use [this](https://github.com/samarth-robo/py-faster-rcnn/tree/d26d1e386ec185d22707d06f9f5c8e47a255bc9a) version of the repository. I've created `-seg` versions of the training and solver prototxt files e.g. `experiments/scripts/faster_rcnn_end2end-seg.sh`.
 
